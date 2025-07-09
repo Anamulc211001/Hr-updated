@@ -1,6 +1,7 @@
 import React from 'react';
 import MetricCard from '../Common/MetricCard';
 import Chart from '../Common/Chart';
+import { semanticColors, chartColors } from '../../styles/colors';
 import { Users, TrendingUp, Calendar, DollarSign, UserCheck, AlertTriangle, Clock, Award, Target, Activity, ChevronRight, Bell, FileText, BarChart3 } from 'lucide-react';
 import { mockEmployees, mockAttendanceData, mockRecruitmentData } from '../../data/mockData';
 
@@ -181,22 +182,22 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header with Welcome Message */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-6 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Welcome back!</h1>
-            <p className="text-blue-100 mt-1 text-sm sm:text-base">Here's what's happening with your team today</p>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold drop-shadow-sm">Welcome back!</h1>
+            <p className="text-blue-100 mt-1 text-sm sm:text-base opacity-90">Here's what's happening with your team today</p>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
-              <div className="text-xs sm:text-sm text-blue-100">Today</div>
-              <div className="font-semibold text-sm sm:text-base">{new Date().toLocaleDateString('en-US', { 
+              <div className="text-xs sm:text-sm text-blue-100 opacity-80">Today</div>
+              <div className="font-semibold text-sm sm:text-base drop-shadow-sm">{new Date().toLocaleDateString('en-US', { 
                 weekday: 'long',
                 month: 'short', 
                 day: 'numeric'
               })}</div>
             </div>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/30 transition-colors">
               <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
           </div>
@@ -207,60 +208,60 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <button 
           onClick={handleAddEmployee}
-          className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all group w-full"
+          className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 hover:scale-105 transition-all group w-full"
         >
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors flex-shrink-0">
-              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+            <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 group-hover:scale-110 transition-all flex-shrink-0">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 group-hover:text-blue-700" />
             </div>
             <div className="text-left min-w-0 flex-1">
-              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">Add Employee</div>
-              <div className="text-xs text-gray-500 truncate">Quick hire</div>
+              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate group-hover:text-gray-800">Add Employee</div>
+              <div className="text-xs text-gray-500 truncate group-hover:text-gray-600">Quick hire</div>
             </div>
           </div>
         </button>
         
         <button 
           onClick={handleGenerateReport}
-          className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-green-300 transition-all group w-full"
+          className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-green-300 hover:scale-105 transition-all group w-full"
         >
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="p-2 bg-green-50 rounded-lg group-hover:bg-green-100 transition-colors flex-shrink-0">
-              <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+            <div className="p-2 bg-green-50 rounded-lg group-hover:bg-green-100 group-hover:scale-110 transition-all flex-shrink-0">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 group-hover:text-green-700" />
             </div>
             <div className="text-left min-w-0 flex-1">
-              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">Generate Report</div>
-              <div className="text-xs text-gray-500 truncate">Export data</div>
+              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate group-hover:text-gray-800">Generate Report</div>
+              <div className="text-xs text-gray-500 truncate group-hover:text-gray-600">Export data</div>
             </div>
           </div>
         </button>
         
         <button 
           onClick={handlePerformanceReviews}
-          className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-purple-300 transition-all group w-full"
+          className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-purple-300 hover:scale-105 transition-all group w-full"
         >
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="p-2 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors flex-shrink-0">
-              <Award className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+            <div className="p-2 bg-purple-50 rounded-lg group-hover:bg-purple-100 group-hover:scale-110 transition-all flex-shrink-0">
+              <Award className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 group-hover:text-purple-700" />
             </div>
             <div className="text-left min-w-0 flex-1">
-              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">Performance</div>
-              <div className="text-xs text-gray-500 truncate">Reviews</div>
+              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate group-hover:text-gray-800">Performance</div>
+              <div className="text-xs text-gray-500 truncate group-hover:text-gray-600">Reviews</div>
             </div>
           </div>
         </button>
         
         <button 
           onClick={handleAnalytics}
-          className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-yellow-300 transition-all group w-full"
+          className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-yellow-300 hover:scale-105 transition-all group w-full"
         >
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="p-2 bg-yellow-50 rounded-lg group-hover:bg-yellow-100 transition-colors flex-shrink-0">
-              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
+            <div className="p-2 bg-yellow-50 rounded-lg group-hover:bg-yellow-100 group-hover:scale-110 transition-all flex-shrink-0">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 group-hover:text-yellow-700" />
             </div>
             <div className="text-left min-w-0 flex-1">
-              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">Analytics</div>
-              <div className="text-xs text-gray-500 truncate">View trends</div>
+              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate group-hover:text-gray-800">Analytics</div>
+              <div className="text-xs text-gray-500 truncate group-hover:text-gray-600">View trends</div>
             </div>
           </div>
         </button>
@@ -354,7 +355,7 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
             </button>
           </div>
           <div className="w-full overflow-hidden">
-            <Chart data={attendanceChartData} type="line" height={280} color="#10B981" />
+            <Chart data={attendanceChartData} type="line" height={280} color={semanticColors.status.success} />
           </div>
           <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-600">
             <span className="flex items-center">
@@ -377,7 +378,7 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
             </button>
           </div>
           <div className="w-full overflow-hidden">
-            <Chart data={departmentChartData} type="bar" height={280} color="#3B82F6" />
+            <Chart data={departmentChartData} type="bar" height={280} color={semanticColors.departments.engineering} />
           </div>
           <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
             {Object.entries(departmentData).map(([dept, count]) => (
@@ -404,7 +405,7 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
             </button>
           </div>
           <div className="w-full overflow-hidden">
-            <Chart data={performanceTrendData} type="bar" height={250} color="#8B5CF6" />
+            <Chart data={performanceTrendData} type="bar" height={250} color={semanticColors.departments.marketing} />
           </div>
           <div className="mt-3 text-xs text-gray-600">
             <div className="flex items-center justify-between">
@@ -426,7 +427,7 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
             </button>
           </div>
           <div className="w-full overflow-hidden">
-            <Chart data={salaryDistributionData} type="line" height={250} color="#F59E0B" />
+            <Chart data={salaryDistributionData} type="line" height={250} color={semanticColors.status.warning} />
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
             {salaryDistributionData.map((range, index) => (
