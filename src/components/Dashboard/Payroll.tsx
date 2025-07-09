@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { DollarSign, TrendingUp, Users, FileText, Download, Calculator, CreditCard, PieChart, Filter, Search, Eye, Edit, CheckCircle, AlertCircle, Calendar, ArrowUpDown } from 'lucide-react';
+import { DollarSign, TrendingUp, Users, FileText, Download, Calculator, CreditCard, PieChart, Filter, Search, Eye, Edit, CheckCircle, AlertCircle, Calendar, ArrowUpDown, Save, X, User, Building, Star } from 'lucide-react';
 import Chart from '../Common/Chart';
 import { mockEmployees } from '../../data/mockData';
+import { semanticColors } from '../../styles/colors';
 
 interface PayrollRecord {
   id: string;
@@ -28,7 +29,20 @@ const Payroll: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [showPayrollModal, setShowPayrollModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPayrollRecord, setSelectedPayrollRecord] = useState<string | null>(null);
+  const [editingRecord, setEditingRecord] = useState<PayrollRecord | null>(null);
+
+  // Form state for editing payroll
+  const [editFormData, setEditFormData] = useState({
+    baseSalary: '',
+    overtime: '',
+    bonus: '',
+    deductions: '',
+    taxes: '',
+    status: 'pending' as 'pending' | 'processed' | 'paid',
+    payDate: ''
+  });
 
   // Generate mock payroll records
   const generatePayrollRecords = (): PayrollRecord[] => {
@@ -56,7 +70,7 @@ const Payroll: React.FC = () => {
     });
   };
 
-  const [payrollRecords] = useState<PayrollRecord[]>(generatePayrollRecords());
+  const [payrollRecords, setPayrollRecords] = useState<PayrollRecord[]>(generatePayrollRecords());
 
   // Calculate totals and metrics
   const totalGrossPay = payrollRecords.reduce((sum, record) => sum + record.baseSalary + record.overtime + record.bonus, 0);
@@ -111,6 +125,77 @@ const Payroll: React.FC = () => {
     label: item.month,
     value: Math.round(item.amount / 1000) // Convert to thousands
   }));
+
+  // Reset edit form
+  const resetEditForm = () => {
+    setEditFormData({
+      baseSalary: '',
+      overtime: '',
+      bonus: '',
+      deductions: '',
+      taxes: '',
+      status: 'pending',
+      payDate: ''
+    });
+  };
+
+  // Handle edit payroll record
+  const handleEditPayroll = (record: PayrollRecord) => {
+    setEditingRecord(record);
+    setEditFormData({
+      baseSalary: record.baseSalary.toString(),
+      overtime: record.overtime.toString(),
+      bonus: record.bonus.toString(),
+      deductions: record.deductions.toString(),
+      taxes: record.taxes.toString(),
+      status: record.status,
+      payDate: record.payDate || ''
+    });
+    setShowEditModal(true);
+  };
+
+  // Save edited payroll record
+  const handleSaveEditPayroll = () => {
+    if (!editingRecord) {
+      alert('No record selected for editing');
+      return;
+    }
+
+    const baseSalary = parseInt(editFormData.baseSalary) || editingRecord.baseSalary;
+    const overtime = parseInt(editFormData.overtime) || editingRecord.overtime;
+    const bonus = parseInt(editFormData.bonus) || editingRecord.bonus;
+    const deductions = parseInt(editFormData.deductions) || editingRecord.deductions;
+    const taxes = parseInt(editFormData.taxes) || editingRecord.taxes;
+    const netPay = baseSalary + overtime + bonus - taxes - deductions;
+
+    const updatedRecord: PayrollRecord = {
+      ...editingRecord,
+      baseSalary,
+      overtime,
+      bonus,
+      deductions,
+      taxes,
+      netPay,
+      status: editFormData.status,
+      payDate: editFormData.payDate || editingRecord.payDate
+    };
+
+    setPayrollRecords(payrollRecords.map(record => 
+      record.id === editingRecord.id ? updatedRecord : record
+    ));
+    
+    setShowEditModal(false);
+    setEditingRecord(null);
+    resetEditForm();
+  };
+
+  // Handle form input changes
+  const handleEditInputChange = (field: string, value: string) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   // Filter and sort payroll records
   const getFilteredRecords = () => {
@@ -323,6 +408,170 @@ const Payroll: React.FC = () => {
     }
   };
 
+  // Payroll Edit Form Component
+  const PayrollEditForm = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Base Salary
+          </label>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="number"
+              value={editFormData.baseSalary}
+              onChange={(e) => handleEditInputChange('baseSalary', e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter base salary"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Overtime Pay
+          </label>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="number"
+              value={editFormData.overtime}
+              onChange={(e) => handleEditInputChange('overtime', e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter overtime pay"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Bonus
+          </label>
+          <div className="relative">
+            <Star className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="number"
+              value={editFormData.bonus}
+              onChange={(e) => handleEditInputChange('bonus', e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter bonus amount"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Deductions
+          </label>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="number"
+              value={editFormData.deductions}
+              onChange={(e) => handleEditInputChange('deductions', e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter deductions"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Taxes
+          </label>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="number"
+              value={editFormData.taxes}
+              onChange={(e) => handleEditInputChange('taxes', e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter tax amount"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Pay Date
+          </label>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="date"
+              value={editFormData.payDate}
+              onChange={(e) => handleEditInputChange('payDate', e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Payroll Status
+        </label>
+        <div className="flex space-x-4">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              value="pending"
+              checked={editFormData.status === 'pending'}
+              onChange={(e) => handleEditInputChange('status', e.target.value)}
+              className="mr-2 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">Pending</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              value="processed"
+              checked={editFormData.status === 'processed'}
+              onChange={(e) => handleEditInputChange('status', e.target.value)}
+              className="mr-2 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">Processed</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              value="paid"
+              checked={editFormData.status === 'paid'}
+              onChange={(e) => handleEditInputChange('status', e.target.value)}
+              className="mr-2 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">Paid</span>
+          </label>
+        </div>
+      </div>
+
+      {/* Net Pay Calculation Display */}
+      <div className="bg-blue-50 p-4 rounded-lg">
+        <div className="flex justify-between items-center">
+          <span className="text-lg font-bold text-gray-900">Calculated Net Pay:</span>
+          <span className="text-2xl font-bold text-blue-600">
+            ${(
+              (parseInt(editFormData.baseSalary) || 0) + 
+              (parseInt(editFormData.overtime) || 0) + 
+              (parseInt(editFormData.bonus) || 0) - 
+              (parseInt(editFormData.taxes) || 0) - 
+              (parseInt(editFormData.deductions) || 0)
+            ).toLocaleString()}
+          </span>
+        </div>
+        <div className="text-sm text-gray-600 mt-2">
+          This amount will be automatically calculated based on the values above
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
@@ -424,7 +673,7 @@ const Payroll: React.FC = () => {
               <span>Export</span>
             </button>
           </div>
-          <Chart data={departmentPayrollData} type="bar" height={280} color="#8B5CF6" />
+          <Chart data={departmentPayrollData} type="bar" height={280} color={semanticColors.departments.marketing} />
           <div className="mt-3 text-xs text-gray-600">
             <div className="flex items-center justify-between">
               <span>Values in thousands ($K)</span>
@@ -444,7 +693,7 @@ const Payroll: React.FC = () => {
               <span>Tax Report</span>
             </button>
           </div>
-          <Chart data={payrollHistoryData} type="line" height={280} color="#10B981" />
+          <Chart data={payrollHistoryData} type="line" height={280} color={semanticColors.status.success} />
           <div className="mt-3 text-xs text-gray-600">
             <div className="flex items-center justify-between">
               <span>7-month trend (in $K)</span>
@@ -652,13 +901,14 @@ const Payroll: React.FC = () => {
                             setSelectedPayrollRecord(record.id);
                             setShowPayrollModal(true);
                           }}
-                          className="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                          className="text-blue-600 hover:text-blue-800 transition-colors p-1 hover:bg-blue-50 rounded"
                           title="View Details"
                         >
                           <Eye size={16} />
                         </button>
                         <button 
-                          className="text-gray-600 hover:text-gray-800 transition-colors p-1"
+                          onClick={() => handleEditPayroll(record)}
+                          className="text-green-600 hover:text-green-800 transition-colors p-1 hover:bg-green-50 rounded"
                           title="Edit Payroll"
                         >
                           <Edit size={16} />
@@ -804,6 +1054,60 @@ const Payroll: React.FC = () => {
         </div>
       </div>
 
+      {/* Edit Payroll Modal */}
+      {showEditModal && editingRecord && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  {(() => {
+                    const employee = mockEmployees.find(emp => emp.id === editingRecord.employeeId);
+                    return employee ? (
+                      <>
+                        <img
+                          src={employee.avatar}
+                          alt={employee.name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">Edit Payroll - {employee.name}</h3>
+                          <p className="text-gray-600">{employee.department} • {employee.role}</p>
+                        </div>
+                      </>
+                    ) : null;
+                  })()}
+                </div>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <PayrollEditForm />
+
+              <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-6 pt-6 border-t border-gray-200">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEditPayroll}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                >
+                  <Save size={16} />
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Payroll Detail Modal */}
       {showPayrollModal && selectedPayrollRecord && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -906,6 +1210,16 @@ const Payroll: React.FC = () => {
                         className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                       >
                         Close
+                      </button>
+                      <button 
+                        onClick={() => {
+                          handleEditPayroll(record);
+                          setShowPayrollModal(false);
+                        }}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+                      >
+                        <Edit size={16} />
+                        <span>Edit Payroll</span>
                       </button>
                       <button 
                         onClick={() => {
