@@ -106,7 +106,7 @@ Each department has a designated color for consistency:
 - **Primary Background**: `#ffffff` (white)
 - **Secondary Background**: `#fafafa` (neutral-50)
 - **Muted Background**: `#f5f5f5` (neutral-100)
-- **Dark Background**: `#0f172a` (secondary-900) - Sidebar
+- **Sidebar Background**: `#ffffff` (white) - Clean white sidebar
 
 ### Border Colors
 - **Light Borders**: `#e5e5e5` (neutral-200)

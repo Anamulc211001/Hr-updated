@@ -130,7 +130,7 @@ export const semanticColors = {
     primary: '#ffffff',                     // Main background
     secondary: colorPalette.neutral[50],    // Secondary background
     muted: colorPalette.neutral[100],       // Muted background
-    dark: colorPalette.secondary[900],      // Dark background (sidebar)
+    sidebar: '#ffffff',                     // Sidebar background (now white)
   },
 
   // Border Colors
