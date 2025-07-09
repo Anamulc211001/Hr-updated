@@ -58,8 +58,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, isOp
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              <button
-              onClick={() => setIsOpen(false)}
               className="lg:hidden text-slate-400 hover:text-white hover:bg-slate-700 p-1 rounded-lg transition-all"
             >
               <X size={24} />
