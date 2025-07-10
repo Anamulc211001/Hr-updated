@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu } from 'lucide-react';
 import Sidebar from './components/Sidebar';
+import Header from './components/Layout/Header';
 import Overview from './components/Dashboard/Overview';
 import Employees from './components/Dashboard/Employees';
 import Performance from './components/Dashboard/Performance';
@@ -46,6 +47,9 @@ function App() {
         setIsOpen={setSidebarOpen}
       />
       <div className="flex-1 flex flex-col">
+        {/* Desktop Header */}
+        <Header />
+        
         {/* Mobile header */}
         <div className="lg:hidden bg-white border-b border-gray-200 p-4">
           <div className="flex items-center justify-between">
@@ -64,7 +68,7 @@ function App() {
         
         {/* Main content */}
         <div className="flex-1 overflow-auto">
-          <div className="p-4 sm:p-6 lg:p-8">
+          <div className="p-4 sm:p-6 lg:p-6">
             {renderContent()}
           </div>
         </div>
