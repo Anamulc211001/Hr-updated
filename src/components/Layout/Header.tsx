@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, Mail, ChevronDown, Briefcase } from 'lucide-react';
+import { Search, Bell, Mail, ChevronDown } from 'lucide-react';
 
 const Header: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,18 +17,8 @@ const Header: React.FC = () => {
 
   return (
     <header className="hidden lg:flex items-center justify-between bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
-      {/* Logo Section */}
-      <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-2">
-          <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg shadow-md">
-            <Briefcase className="h-6 w-6 text-white" />
-          </div>
-          <span className="text-xl font-bold text-gray-900 tracking-tight">HRL</span>
-        </div>
-      </div>
-
       {/* Search Bar */}
-      <div className="flex-1 max-w-2xl mx-8">
+      <div className="flex-1 max-w-2xl">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           <input
