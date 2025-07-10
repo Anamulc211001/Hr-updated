@@ -1,14 +1,35 @@
 import React from 'react';
 
+interface ChartDataPoint {
+  label: string;
+  value: number;
+}
+
+interface ChartDataset {
+  label: string;
+  data: ChartDataPoint[];
+  color: string;
+  fillOpacity?: number;
+}
+
 interface ChartProps {
-  data: Array<{ label: string; value: number }>;
+  data?: Array<{ label: string; value: number }>; // Keep for backward compatibility
+  datasets?: ChartDataset[]; // New prop for multi-line charts
   type: 'bar' | 'line' | 'pie';
   height?: number;
   color?: string;
 }
 
-const Chart: React.FC<ChartProps> = ({ data, type, height = 300, color = '#3B82F6' }) => {
-  if (!data || data.length === 0) {
+const Chart: React.FC<ChartProps> = ({ data, datasets, type, height = 300, color = '#3B82F6' }) => {
+  // Use datasets if provided, otherwise convert single data to datasets format
+  const chartDatasets = datasets || (data ? [{
+    label: 'Data',
+    data: data,
+    color: color,
+    fillOpacity: 0.1
+  }] : []);
+
+  if (!chartDatasets || chartDatasets.length === 0 || chartDatasets.every(dataset => !dataset.data || dataset.data.length === 0)) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
         <p className="text-gray-500">No data available</p>
@@ -16,7 +37,8 @@ const Chart: React.FC<ChartProps> = ({ data, type, height = 300, color = '#3B82F
     );
   }
 
-  const maxValue = Math.max(...data.map(item => item.value));
+  // Calculate max value across all datasets
+  const maxValue = Math.max(...chartDatasets.flatMap(dataset => dataset.data.map(item => item.value)));
   if (maxValue === 0) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
@@ -26,11 +48,14 @@ const Chart: React.FC<ChartProps> = ({ data, type, height = 300, color = '#3B82F
   }
   
   const padding = 50;
-  const chartWidth = Math.max(400, data.length * 60); // Dynamic width based on data points
+  const chartWidth = Math.max(400, (chartDatasets[0]?.data.length || 0) * 80); // Dynamic width based on data points
   const chartHeight = height - padding * 2;
 
   const renderBarChart = () => {
-    const barWidth = Math.max(20, Math.min(60, (chartWidth - padding * 2) / data.length - 10));
+    const singleDataset = chartDatasets[0];
+    if (!singleDataset) return null;
+
+    const barWidth = Math.max(20, Math.min(60, (chartWidth - padding * 2) / singleDataset.data.length - 10));
 
     return (
       <div className="w-full overflow-x-auto">
@@ -68,7 +93,7 @@ const Chart: React.FC<ChartProps> = ({ data, type, height = 300, color = '#3B82F
           })}
 
           {/* Bars */}
-          {data.map((item, index) => {
+          {singleDataset.data.map((item, index) => {
             const x = padding + index * (barWidth + 10) + 5;
             const barHeight = maxValue > 0 ? (item.value / maxValue) * chartHeight : 0;
             const y = padding + chartHeight - barHeight;
@@ -80,7 +105,7 @@ const Chart: React.FC<ChartProps> = ({ data, type, height = 300, color = '#3B82F
                   y={y}
                   width={barWidth}
                   height={barHeight}
-                  fill={color}
+                  fill={singleDataset.color}
                   className="hover:opacity-80 transition-opacity cursor-pointer"
                   rx="2"
                 />
@@ -111,16 +136,10 @@ const Chart: React.FC<ChartProps> = ({ data, type, height = 300, color = '#3B82F
   };
 
   const renderLineChart = () => {
-    const pointSpacing = (chartWidth - padding * 2) / Math.max(1, data.length - 1);
+    if (!chartDatasets[0]) return null;
 
-    const points = data.map((item, index) => ({
-      x: padding + (data.length === 1 ? (chartWidth - padding * 2) / 2 : index * pointSpacing),
-      y: padding + chartHeight - (maxValue > 0 ? (item.value / maxValue) * chartHeight : 0)
-    }));
-
-    const pathData = points.map((point, index) => 
-      `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
-    ).join(' ');
+    const dataLength = chartDatasets[0].data.length;
+    const pointSpacing = (chartWidth - padding * 2) / Math.max(1, dataLength - 1);
 
     return (
       <div className="w-full overflow-x-auto">
@@ -141,15 +160,15 @@ const Chart: React.FC<ChartProps> = ({ data, type, height = 300, color = '#3B82F
                   y1={y}
                   x2={chartWidth - padding}
                   y2={y}
-                  stroke="#E5E7EB"
+                  stroke="#F3F4F6"
                   strokeWidth="1"
                 />
                 <text
                   x={padding - 10}
                   y={y + 4}
                   textAnchor="end"
-                  className="text-xs fill-gray-500"
-                  fontSize="12"
+                  className="text-xs fill-gray-400"
+                  fontSize="11"
                 >
                   {Math.round((maxValue * percent) / 100)}
                 </text>
@@ -157,63 +176,72 @@ const Chart: React.FC<ChartProps> = ({ data, type, height = 300, color = '#3B82F
             );
           })}
 
-          {/* Area under the line */}
-          {points.length > 1 && (
-            <path
-              d={`${pathData} L ${points[points.length - 1].x} ${padding + chartHeight} L ${points[0].x} ${padding + chartHeight} Z`}
-              fill={color}
-              fillOpacity="0.1"
-            />
-          )}
+          {/* Render each dataset */}
+          {chartDatasets.map((dataset, datasetIndex) => {
+            const points = dataset.data.map((item, index) => ({
+              x: padding + (dataLength === 1 ? (chartWidth - padding * 2) / 2 : index * pointSpacing),
+              y: padding + chartHeight - (maxValue > 0 ? (item.value / maxValue) * chartHeight : 0)
+            }));
 
-          {/* Line */}
-          {points.length > 1 && (
-            <path
-              d={pathData}
-              fill="none"
-              stroke={color}
-              strokeWidth="3"
-              className="drop-shadow-sm"
-            />
-          )}
+            const pathData = points.map((point, index) => 
+              `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+            ).join(' ');
 
-          {/* Points */}
-          {points.map((point, index) => (
-            <g key={index}>
-              <circle
-                cx={point.x}
-                cy={point.y}
-                r="5"
-                fill={color}
-                className="hover:r-7 transition-all cursor-pointer"
-                stroke="white"
-                strokeWidth="2"
-              />
+            return (
+              <g key={datasetIndex}>
+                {/* Area under the line */}
+                {points.length > 1 && (
+                  <path
+                    d={`${pathData} L ${points[points.length - 1].x} ${padding + chartHeight} L ${points[0].x} ${padding + chartHeight} Z`}
+                    fill={dataset.color}
+                    fillOpacity={dataset.fillOpacity || 0.1}
+                  />
+                )}
+
+                {/* Line */}
+                {points.length > 1 && (
+                  <path
+                    d={pathData}
+                    fill="none"
+                    stroke={dataset.color}
+                    strokeWidth="2.5"
+                    className="drop-shadow-sm"
+                  />
+                )}
+
+                {/* Points */}
+                {points.map((point, index) => (
+                  <circle
+                    key={index}
+                    cx={point.x}
+                    cy={point.y}
+                    r="4"
+                    fill={dataset.color}
+                    className="hover:r-6 transition-all cursor-pointer drop-shadow-sm"
+                    stroke="white"
+                    strokeWidth="2"
+                  />
+                ))}
+              </g>
+            );
+          })}
+
+          {/* X-axis labels */}
+          {chartDatasets[0] && chartDatasets[0].data.map((item, index) => {
+            const x = padding + (dataLength === 1 ? (chartWidth - padding * 2) / 2 : index * pointSpacing);
+            return (
               <text
-                x={point.x}
-                y={point.y - 15}
+                key={index}
+                x={x}
+                y={height - 15}
                 textAnchor="middle"
-                className="text-xs fill-gray-700 font-medium"
+                className="text-xs fill-gray-600"
                 fontSize="11"
               >
-                {data[index].value}
+                {item.label}
               </text>
-            </g>
-          ))}
-
-          {/* Labels */}
-          {data.map((item, index) => (
-            <text
-              key={index}
-              x={points[index].x}
-              y={height - 15}
-              textAnchor="middle"
-              className="text-xs fill-gray-600"
-              fontSize="11"
-            >
-              {item.label}
-            </text>
-          ))}
+            );
+          })}
         </svg>
       </div>
     );

@@ -28,10 +28,35 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
   const upcomingReviews = mockEmployees.filter(emp => emp.performanceRating < 4.0).length;
 
   // Dynamic attendance chart data from last 7 days
-  const attendanceChartData = mockAttendanceData.slice(-7).map(item => ({
-    label: new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' }),
-    value: item.present
-  }));
+  const attendanceChartDatasets = [
+    {
+      label: 'Present',
+      data: mockAttendanceData.slice(-7).map(item => ({
+        label: new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' }),
+        value: item.present
+      })),
+      color: '#22c55e', // Green
+      fillOpacity: 0.15
+    },
+    {
+      label: 'Late',
+      data: mockAttendanceData.slice(-7).map(item => ({
+        label: new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' }),
+        value: item.late
+      })),
+      color: '#f59e0b', // Amber
+      fillOpacity: 0.1
+    },
+    {
+      label: 'Absent',
+      data: mockAttendanceData.slice(-7).map(item => ({
+        label: new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' }),
+        value: item.absent
+      })),
+      color: '#3b82f6', // Blue
+      fillOpacity: 0.08
+    }
+  ];
 
   // Dynamic department distribution from employee data
   const departmentData = mockEmployees.reduce((acc, emp) => {
@@ -355,11 +380,343 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
             </button>
           </div>
           <div className="w-full overflow-hidden">
-            <Chart data={attendanceChartData} type="line" height={280} color={semanticColors.status.success} />
+            <Chart datasets={attendanceChartDatasets} type="line" height={280} />
           </div>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-600">
-            <span className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
+          <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-600">
+            <span className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span className="font-medium">Present</span>
+            </span>
+            <span className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+              <span className="font-medium">Late</span>
+            </span>
+            <span className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <span className="font-medium">Absent</span>
+            </span>
+            <span className="ml-auto text-gray-500">
+              Avg Present: {Math.round(attendanceChartDatasets[0].data.reduce((sum, item) => sum + item.value, 0) / attendanceChartDatasets[0].data.length)}
+            </span>
+          </div>
+        </div>
+        
+        {/* Department Distribution Chart */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Department Distribution</h3>
+            <button 
+              onClick={() => handleNavigation('employees')}
+              className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              View All →
+            </button>
+          </div>
+          <div className="w-full overflow-hidden">
+            <Chart data={departmentChartData} type="bar" height={280} color={semanticColors.departments.engineering} />
+          </div>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+            {Object.entries(departmentData).map(([dept, count]) => (
+              <div key={dept} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span className="truncate text-gray-700">{dept}</span>
+                <span className="font-medium text-blue-600">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Secondary Charts Section */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+        {/* Performance by Department */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Performance by Department</h3>
+            <button 
+              onClick={() => handleNavigation('performance')}
+              className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              Analyze →
+            </button>
+          </div>
+          <div className="w-full overflow-hidden">
+            <Chart data={performanceTrendData} type="bar" height={250} color={semanticColors.departments.marketing} />
+          </div>
+          <div className="mt-3 text-xs text-gray-600">
+            <div className="flex items-center justify-between">
+              <span>Company Average:</span>
+              <span className="font-medium">{Math.round(avgPerformance * 20)}%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Salary Distribution */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Salary Distribution</h3>
+            <button 
+              onClick={() => handleNavigation('payroll')}
+              className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              View Payroll →
+            </button>
+          </div>
+          <div className="w-full overflow-hidden">
+            <Chart data={salaryDistributionData} type="line" height={250} color={semanticColors.status.warning} />
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+            {salaryDistributionData.map((range, index) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span className="text-gray-700">{range.label}</span>
+                <span className="font-medium text-yellow-600">{range.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Alerts and Notifications */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+              <Bell className="h-5 w-5 mr-2 text-orange-500" />
+              Priority Alerts
+            </h3>
+            <button 
+              onClick={handleViewAllAlerts}
+              className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              View All
+            </button>
+          </div>
+          <div className="space-y-3">
+            {upcomingReviews > 0 && (
+              <button 
+                onClick={() => handleAlertClick('reviews')}
+                className="w-full flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors text-left"
+              >
+                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900">
+                    {upcomingReviews} employees need performance reviews
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">Schedule reviews to maintain performance standards</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              </button>
+            )}
+            
+            {lowAttendance > 0 && (
+              <button 
+                onClick={() => handleAlertClick('attendance')}
+                className="w-full flex items-start space-x-3 p-3 bg-red-50 rounded-lg border border-red-200 hover:bg-red-100 transition-colors text-left"
+              >
+                <Clock className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900">
+                    {lowAttendance} employees have low attendance
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">Consider reaching out for support or intervention</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              </button>
+            )}
+            
+            <button 
+              onClick={() => handleAlertClick('payroll')}
+              className="w-full flex items-start space-x-3 p-3 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors text-left"
+            >
+              <FileText className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900">
+                  Monthly payroll processing due in 3 days
+                </p>
+                <p className="text-xs text-gray-600 mt-1">Ensure all timesheets are submitted and approved</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            </button>
+          </div>
+        </div>
+
+        {/* Team Highlights */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+              <Award className="h-5 w-5 mr-2 text-green-500" />
+              Team Highlights
+            </h3>
+            <button 
+              onClick={handleViewMoreHighlights}
+              className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              View More
+            </button>
+          </div>
+          <div className="space-y-4">
+            {mockEmployees
+              .sort((a, b) => b.performanceRating - a.performanceRating)
+              .slice(0, 3)
+              .map((employee, index) => (
+                <button
+                  key={employee.id}
+                  onClick={() => handleNavigation('employees')}
+                  className="w-full flex items-center space-x-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-left"
+                >
+                  <img
+                    src={employee.avatar}
+                    alt={employee.name}
+                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 truncate">{employee.name}</div>
+                    <div className="text-sm text-gray-600 truncate">{employee.department}</div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-sm font-bold text-green-600">{employee.performanceRating.toFixed(1)}</div>
+                    <div className="text-xs text-gray-500">
+                      {index === 0 ? '🏆 Top' : index === 1 ? '🥈 2nd' : '🥉 3rd'}
+                    </div>
+                  </div>
+                </button>
+              ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Department Performance Details */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Department Performance Overview</h3>
+          <button 
+            onClick={handleViewDepartmentDetails}
+            className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors flex items-center space-x-1"
+          >
+            <span>View Details</span>
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Object.entries(departmentData).map(([dept, count]) => {
+            const deptEmployees = mockEmployees.filter(emp => emp.department === dept);
+            const avgDeptSalary = Math.round(deptEmployees.reduce((sum, emp) => sum + emp.salary, 0) / count);
+            const avgDeptPerformance = deptEmployees.reduce((sum, emp) => sum + emp.performanceRating, 0) / count;
+            const avgDeptAttendance = Math.round(deptEmployees.reduce((sum, emp) => sum + emp.attendanceRate, 0) / count);
+            
+            return (
+              <button
+                key={dept}
+                onClick={() => handleNavigation('employees')}
+                className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all hover:border-blue-300 text-left w-full"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium text-gray-900 truncate">{dept}</h4>
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full flex-shrink-0">{count}</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Avg Salary:</span>
+                    <span className="font-medium">${avgDeptSalary.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Performance:</span>
+                    <span className="font-medium">{avgDeptPerformance.toFixed(1)}/5</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Attendance:</span>
+                    <span className="font-medium">{avgDeptAttendance}%</span>
+                  </div>
+                  <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${(avgDeptPerformance / 5) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Recent Activity - Enhanced with Real Data */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Recent Activity & Insights</h3>
+          <div className="text-xs text-gray-500">
+            Last updated: {new Date().toLocaleTimeString('en-US', { 
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </div>
+        </div>
+        <div className="space-y-3 sm:space-y-4">
+          <button 
+            onClick={() => handleActivityClick('hires')}
+            className="w-full flex items-start space-x-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-left"
+          >
+            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900">
+                {recentHires} new employees joined this month
+              </p>
+              <p className="text-xs text-gray-500">
+                Latest: {mockEmployees
+                  .filter(emp => new Date(emp.joinDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
+                  .sort((a, b) => new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime())[0]?.name || 'None this month'}
+              </p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
+          </button>
+          
+          <button 
+            onClick={() => handleActivityClick('performance')}
+            className="w-full flex items-start space-x-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-left"
+          >
+            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900">
+                {highPerformers} employees with excellent performance ratings
+              </p>
+              <p className="text-xs text-gray-500">Top performer: {mockEmployees.sort((a, b) => b.performanceRating - a.performanceRating)[0]?.name}</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
+          </button>
+          
+          <button 
+            onClick={() => handleActivityClick('attendance')}
+            className="w-full flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors text-left"
+          >
+            <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900">
+                {lowAttendance} employees need attendance improvement
+              </p>
+              <p className="text-xs text-gray-500">Average attendance: {avgAttendance}%</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
+          </button>
+
+          <button 
+            onClick={() => handleActivityClick('recruitment')}
+            className="w-full flex items-start space-x-3 p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors text-left"
+          >
+            <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900">
+                {openPositions} open positions across {new Set(mockRecruitmentData.filter(pos => pos.stage !== 'hired').map(pos => pos.department)).size} departments
+              </p>
+              <p className="text-xs text-gray-500">Priority hiring in progress</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Overview;
               Present
             </span>
             <span>Avg: {Math.round(attendanceChartData.reduce((sum, item) => sum + item.value, 0) / attendanceChartData.length)}</span>
