@@ -405,27 +405,47 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
           </div>
         </div>
         
-        {/* Department Distribution Chart */}
+        {/* Team Highlights */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Department Distribution</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+              <Award className="h-5 w-5 mr-2 text-green-500" />
+              Team Highlights
+            </h3>
             <button 
-              onClick={() => handleNavigation('employees')}
+              onClick={handleViewMoreHighlights}
               className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors"
             >
-              View All →
+              View More
             </button>
           </div>
-          <div className="w-full overflow-hidden">
-            <Chart data={departmentChartData} type="bar" height={280} color={semanticColors.departments.engineering} />
-          </div>
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-            {Object.entries(departmentData).map(([dept, count]) => (
-              <div key={dept} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <span className="truncate text-gray-700">{dept}</span>
-                <span className="font-medium text-blue-600">{count}</span>
-              </div>
-            ))}
+          <div className="space-y-4">
+            {mockEmployees
+              .sort((a, b) => b.performanceRating - a.performanceRating)
+              .slice(0, 3)
+              .map((employee, index) => (
+                <button
+                  key={employee.id}
+                  onClick={() => handleNavigation('employees')}
+                  className="w-full flex items-center space-x-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-left"
+                >
+                  <img
+                    src={employee.avatar}
+                    alt={employee.name}
+                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 truncate">{employee.name}</div>
+                    <div className="text-sm text-gray-600 truncate">{employee.department}</div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-sm font-bold text-green-600">{employee.performanceRating.toFixed(1)}</div>
+                    <div className="text-xs text-gray-500">
+                      {index === 0 ? '🏆 Top' : index === 1 ? '🥈 2nd' : '🥉 3rd'}
+                    </div>
+                  </div>
+                </button>
+              ))}
           </div>
         </div>
       </div>
@@ -543,47 +563,47 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
           </div>
         </div>
 
-        {/* Team Highlights */}
+        {/* Quick Insights */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
-              <Award className="h-5 w-5 mr-2 text-green-500" />
-              Team Highlights
+              <BarChart3 className="h-5 w-5 mr-2 text-purple-500" />
+              Quick Insights
             </h3>
-            <button 
-              onClick={handleViewMoreHighlights}
-              className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              View More
-            </button>
           </div>
           <div className="space-y-4">
-            {mockEmployees
-              .sort((a, b) => b.performanceRating - a.performanceRating)
-              .slice(0, 3)
-              .map((employee, index) => (
-                <button
-                  key={employee.id}
-                  onClick={() => handleNavigation('employees')}
-                  className="w-full flex items-center space-x-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-left"
-                >
-                  <img
-                    src={employee.avatar}
-                    alt={employee.name}
-                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 truncate">{employee.name}</div>
-                    <div className="text-sm text-gray-600 truncate">{employee.department}</div>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <div className="text-sm font-bold text-green-600">{employee.performanceRating.toFixed(1)}</div>
-                    <div className="text-xs text-gray-500">
-                      {index === 0 ? '🏆 Top' : index === 1 ? '🥈 2nd' : '🥉 3rd'}
-                    </div>
-                  </div>
-                </button>
-              ))}
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-900">Department Performance</span>
+                <span className="text-sm font-bold text-purple-600">
+                  {Object.keys(departmentData).find(dept => {
+                    const deptEmployees = mockEmployees.filter(emp => emp.department === dept);
+                    const avgRating = deptEmployees.reduce((sum, emp) => sum + emp.performanceRating, 0) / deptEmployees.length;
+                    return avgRating === Math.max(...Object.keys(departmentData).map(d => {
+                      const employees = mockEmployees.filter(emp => emp.department === d);
+                      return employees.reduce((sum, emp) => sum + emp.performanceRating, 0) / employees.length;
+                    }));
+                  })} leads
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">Highest average performance rating</p>
+            </div>
+            
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-900">Attendance Trend</span>
+                <span className="text-sm font-bold text-blue-600">↗ Improving</span>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">Weekly attendance showing positive trend</p>
+            </div>
+            
+            <div className="p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-900">Team Growth</span>
+                <span className="text-sm font-bold text-green-600">+{recentHires} this month</span>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">New team members successfully onboarded</p>
+            </div>
           </div>
         </div>
       </div>
@@ -717,6 +737,30 @@ const Overview: React.FC<OverviewProps> = ({ setActiveSection }) => {
         </div>
       </div>
     </div>
+
+      {/* Department Distribution - Moved to bottom */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Employee Distribution by Department</h3>
+          <button 
+            onClick={() => handleNavigation('employees')}
+            className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            View All Employees →
+          </button>
+        </div>
+        <div className="w-full overflow-hidden">
+          <Chart data={departmentChartData} type="bar" height={280} color={semanticColors.departments.engineering} />
+        </div>
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
+          {Object.entries(departmentData).map(([dept, count]) => (
+            <div key={dept} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+              <span className="truncate text-gray-700 font-medium">{dept}</span>
+              <span className="font-bold text-blue-600">{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
   );
 };
 
