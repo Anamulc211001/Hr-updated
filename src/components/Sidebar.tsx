@@ -10,7 +10,9 @@ import {
   BookOpen, 
   Bell,
   Menu,
-  X
+  X,
+  HelpCircle,
+  LogOut
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -91,6 +93,37 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, isOp
               );
             })}
           </nav>
+          
+          {/* Bottom Actions */}
+          <div className="p-4 border-t border-gray-200 space-y-2">
+            {/* Helpline Button */}
+            <button
+              onClick={() => {
+                // Handle helpline action - could open a modal, navigate to help page, or open chat
+                alert('Helpline: Call +1-800-HR-HELP or email support@company.com');
+              }}
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-green-50 hover:text-green-700 transition-all duration-200 hover:transform hover:scale-102"
+            >
+              <HelpCircle size={18} className="flex-shrink-0" />
+              <span className="font-medium text-sm lg:text-base">Help & Support</span>
+            </button>
+            
+            {/* Logout Button */}
+            <button
+              onClick={() => {
+                // Handle logout action
+                if (confirm('Are you sure you want to logout?')) {
+                  // Perform logout logic here
+                  alert('Logging out...');
+                  // In a real app, you would clear auth tokens and redirect
+                }
+              }}
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 hover:transform hover:scale-102"
+            >
+              <LogOut size={18} className="flex-shrink-0" />
+              <span className="font-medium text-sm lg:text-base">Logout</span>
+            </button>
+          </div>
         </div>
       </div>
     </>
